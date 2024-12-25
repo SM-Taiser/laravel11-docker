@@ -1,0 +1,49 @@
+services: 
+  nginx:
+    build:
+      context: .
+      dockerfile: nginx.dockerfile    
+    container_name: nginx
+    volumes:
+      - .:/var/www/html  # Mount the Laravel project directory
+    ports:
+      - "80:80"  # Expose port 80 to the host machine
+    networks:
+      - laravel-network
+    depends_on:
+      - laravel_app
+      - laravel_mysql
+      
+  laravel_app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: laravel_app
+    restart: unless-stopped
+    tty: true
+    volumes:
+      - .:/var/www/html  # Mount the Laravel project directory
+    networks:
+      - laravel-network
+
+  laravel_mysql:
+    image: mysql:latest
+    container_name: laravel_mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: laravel_test
+      MYSQL_USER: user
+      MYSQL_PASSWORD: secret
+    ports:
+      - 3306:3306
+    volumes:
+      - mysql-data:/var/lib/mysql
+    networks:
+      - laravel-network     
+
+networks:
+  laravel-network:
+    driver: bridge      
+
+volumes:
+  mysql-data: # Declare the named volume here        
