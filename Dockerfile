@@ -16,21 +16,30 @@ RUN apk add --no-cache \
     libxml2-dev \
     oniguruma-dev \
     libzip-dev \
+    build-base \
     nodejs \
     npm \
     && docker-php-ext-configure gd --with-freetype --with-jpeg \
     && docker-php-ext-install pdo_mysql mbstring gd xml bcmath zip opcache \
     && apk del oniguruma-dev
 
+# Copy application files
+COPY . /var/www/html
+
 # Install Composer (latest version)
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
-# Install Node.js dependencies
-RUN npm install && npm run build
+# Install Laravel PHP dependencies
+RUN composer install --no-dev --optimize-autoloader
+
+# Install Node.js dependencies and build assets
+RUN npm ci \
+    && npm run build
 
 # Set permissions for Laravel
 RUN chown -R www-data:www-data /var/www/html \
-    && chmod -R 755 /var/www/html
+    && chmod -R 755 /var/www/html \
+    && chmod -R 775 /var/www/html/storage /var/www/html/bootstrap/cache
 
 # Optimize PHP configuration for Laravel
 RUN echo "date.timezone=UTC" > /usr/local/etc/php/conf.d/timezone.ini \
