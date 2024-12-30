@@ -5,7 +5,7 @@ services:
       dockerfile: nginx.dockerfile    
     container_name: nginx
     volumes:
-      - .:/var/www/html  # Mount the Laravel project directory
+      - /var/www/laravel11-docker:/var/www/html # Host to container mapping
     ports:
       - "80:80"  # Expose port 80 to the host machine
     networks:
@@ -22,7 +22,7 @@ services:
     restart: unless-stopped
     tty: true
     volumes:
-      - .:/var/www/html  # Mount the Laravel project directory
+      - /var/www/laravel11-docker:/var/www/html  # Mount the Laravel project directory
     networks:
       - laravel-network
 
